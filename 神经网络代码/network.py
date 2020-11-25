@@ -9,8 +9,12 @@ class CrossEntropyCost(object):
     @staticmethod
     def fn(a, y):
         """交叉熵损失函数"""
+        sums = 0
+        for zi in a:
+            sums += np.exp(zi)
+        sums = np.log(sums)
 
-        return np.sum(np.nan_to_num(-y * np.log(a)))
+        return np.sum(-y * (a - sums))
 
     @staticmethod
     def delta(z, a, y):
@@ -62,8 +66,9 @@ class Network(object):
 
     def feedforward(self, a):
         """前向传播"""
-        for b, w in zip(self.biases, self.weights):
+        for b, w in zip(self.biases[:-1], self.weights[:-1]):
             a = ReLU(np.dot(w, a) + b)
+        a = np.dot(self.weights[-1], a) + self.biases[-1]
         return a
 
     def SGD(self, training_data, epochs, mini_batch_size, eta, lambda1=0.0,
@@ -105,7 +110,7 @@ class Network(object):
             if monitor_training_cost:
                 cost = self.total_cost(training_data, lambda1)
                 training_cost.append(cost)
-                print("测试集的损失函数: {}".format(cost[0]))
+                print("测试集的损失函数: {}".format(cost))
             if monitor_training_accuracy:
                 accuracy = self.accuracy(training_data, convert=True)
                 training_accuracy.append(accuracy)
@@ -114,7 +119,7 @@ class Network(object):
             if monitor_evaluation_cost:
                 cost = self.total_cost(evaluation_data, lambda1, convert=True)
                 evaluation_cost.append(cost)
-                print("验证集的损失函数: {}".format(cost[0]))
+                print("验证集的损失函数: {}".format(cost))
             if monitor_evaluation_accuracy:
                 accuracy = self.accuracy(evaluation_data)
                 evaluation_accuracy.append(accuracy)

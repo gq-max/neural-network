@@ -104,16 +104,24 @@ import numpy as np
 
 
 training_data, validation_data, test_data = load_data.load_data_wrapper()
-net = network.Network([784, 15, 10], cost=network.CrossEntropyCost)
-y = net.SGD(training_data, 30, 9, 0.08, lambda1=28,
-            evaluation_data=test_data,
+net = network.Network([784, 25, 10], cost=network.CrossEntropyCost)
+y = net.SGD(training_data, 30, 12, 0.08, lambda1=5,
+            evaluation_data=validation_data,
+            monitor_training_cost=True,
+            monitor_evaluation_cost=True,
             monitor_training_accuracy=True,
             monitor_evaluation_accuracy=True)
 x = np.arange(30)
+y0 = [i for i in y[0]]
 y1 = [i/10000 for i in y[1]]
-y2 = [i/50000 for i in y[3]]
-plt.axis([0, 30, 0.89, 0.98])
-plt.plot(x, y1, 'g', label='evaluation_cost')
+y2 = [i for i in y[2]]
+y3 = [i/50000 for i in y[3]]
+plt.subplot(1, 2, 1)
+plt.plot(x, y0, 'g', label='evaluation_cost')
 plt.plot(x, y2, 'b', label='training_cost')
+plt.legend()
+plt.subplot(1, 2, 2)
+plt.plot(x, y1, 'r', label='evaluation_acc')
+plt.plot(x, y3, 'y', label='training_acc')
 plt.legend()
 plt.show()
